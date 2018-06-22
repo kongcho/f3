@@ -9,9 +9,6 @@ from astropy.io import fits
 from scipy.ndimage.measurements import label
 from scipy.ndimage.measurements import center_of_mass
 
-logger = logging.getLogger() #also disables root logger!
-logger.setLevel(logging.ERROR)
-
 class star(object):
     """
     The main interface to the f3 photometry package
@@ -24,7 +21,7 @@ class star(object):
 
 
     def __init__(self, kic, ffi_dir=None):
-        
+
         self.obs_filenames = files.ffilist
         self.kic = kic
 
@@ -246,7 +243,6 @@ class star(object):
         targets[key_targ] = 1
         region[key_targ] = 0.0
 
-
         lim = np.zeros(ntargets)
         for peaks in range(1,ntargets):
             k = np.argmax(region)
@@ -265,8 +261,8 @@ class star(object):
         for i in range(1, ntargets+1):
             for j in range(extend_region_size):
                 border= mh.labeled.border(targets, 0, i)
-
                 targets[border*(region < (10)*lim[peaks])] = i
+
         for i in range(2, ntargets+1):
             for j in range(2, ntargets+1):
                 if i != j:
@@ -305,7 +301,6 @@ class star(object):
         std_f = np.zeros(4)
         data_save = np.zeros_like(self.postcard)
         self.obs_flux = np.zeros_like(self.reference_flux)
-
 
         for i in range(4):
             g = np.where(self.qs == i)[0]
@@ -436,7 +431,6 @@ class star(object):
         self.calc_fluxes()
         self.roll_best = np.zeros((4,2))
 
-
         if do_roll == True:
             for i in range(4):
                 g = np.where(self.qs == i)[0]
@@ -469,8 +463,6 @@ class star(object):
 
         jj, ii = self.center
 
-
-
         numer = np.zeros(len(self.times))
         denom = np.zeros(len(self.times))
         factr = np.zeros(len(self.times))
@@ -499,7 +491,6 @@ class star(object):
             for j in range(4):
                 g = np.where(self.qs == j)[0]
                 tar_vals[g,i] /= (np.median(tar_vals[g,i])+1e-15)
-
 
         tar_vals_old = tar_vals + 0.0
 
