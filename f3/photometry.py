@@ -185,7 +185,6 @@ class star(object):
         return best
 
 
-
     def find_other_sources(self,  edge_lim = 0.015, min_val = 5000,
                           ntargets = 250, extend_region_size=3, remove_excess=4,
                           plot_flag = False, plot_window=15):
@@ -291,6 +290,7 @@ class star(object):
                        interpolation='nearest', cmap='gray', vmax=np.percentile(self.integrated_postcard, 99.99))
             plt.show()
 
+
     def do_photometry(self):
         """
         Does photometry and estimates uncertainties by calculating the scatter around a linear fit to the data
@@ -359,7 +359,6 @@ class star(object):
         cid = fig.canvas.mpl_connect('button_press_event', self.onclick)
 
         plt.show(block=True)
-
 
 
     def adjust_aperture(self, image_region=15, ignore_bright=0):
@@ -440,6 +439,7 @@ class star(object):
 
         self.do_photometry()
 
+
     def calc_fluxes(self, min_flux = 5000, outlier_iterations=5,
                        max_outlier_obs=4, outlier_limit=1.7):
         """
@@ -515,6 +515,7 @@ class star(object):
         self.target_flux_pixels = numer_pix
         self.reference_flux = denom
 
+
     def calc_centroids(self):
         """
         Identify the centroid positions for the target star at all epochs. Useful for verifying that there is
@@ -525,6 +526,7 @@ class star(object):
             target = self.postcard[i]
             target[self.targets != 1] = 0.0
             self.cm[i] = center_of_mass(target)
+
 
     def define_spotsignal(self):
         """
@@ -571,6 +573,7 @@ class star(object):
                     self.spot_signal[i] = 1.0
                 else:
                     self.spot_signal[i] = fout[np.abs(self.times[i] - tout) == np.min(np.abs(self.times[i] - tout))]
+
 
     def model_uncert(self):
         """
