@@ -8,6 +8,8 @@ from . import files
 from astropy.io import fits
 from scipy.ndimage.measurements import label
 from scipy.ndimage.measurements import center_of_mass
+from utils import pad_img_wrap
+
 
 class star(object):
     """
@@ -115,12 +117,23 @@ class star(object):
             img = a[channel[season]].data
             img -= np.median(img)
 
-            ymin = int(max([int(row[season])-npix/2,0]))
+            ymintem = int(int(row[season])-npix/2)
+            xmintem = int(int(col[season])-npix/2)
+
+            ymin = int(max([ymintem,0]))
             ymax = int(min([int(row[season])+npix/2,img.shape[0]]))
-            xmin = int(max([int(col[season])-npix/2,0]))
+            xmin = int(max([xmintem,0]))
             xmax = int(min([int(col[season])+npix/2,img.shape[1]]))
 
             pimg = img[ymin:ymax,xmin:xmax]
+
+            if pimg.shape != (npix, npix):
+                sides = []
+                if ymintem < 0:
+                    sides.append("Top")
+                if xmintem < 0:
+                    sides.append("Left")
+                pimg = pad_img_wrap(pimg, (npix, npix), sides, 0)
 
             fin_arr[icount,:,:] = pimg
 
