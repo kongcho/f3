@@ -71,33 +71,39 @@ class star(object):
         row = [targ.params['Row_0'], targ.params['Row_1'],
                     targ.params['Row_2'], targ.params['Row_3']]
 
-        if None in row:
-            raise ValueError('Star not on detector all quarters!')
+        for i in range(len(col)):
+            if col[i] is None or row[i] is None or channel[i] is None:
+                col[i] = np.nan
+                row[i] = np.nan
+                channel[i] = np.nan
 
-        if None in col:
-            raise ValueError('Star not on detector all quarters!')
+        # if None in row:
+        #     raise ValueError('Star not on detector all quarters!')
+
+        # if None in col:
+        #     raise ValueError('Star not on detector all quarters!')
 
         center = np.array([npix/2, npix/2])
 
         # If star close to edge, shift frame so that we have the full npix by npix
         # In this case, postcard will not be centered on target star
-        if (np.min(col) < npix/2):
-            jump = npix/2 - np.min(col) + buffer_size
+        if (np.nanmin(col) < npix/2):
+            jump = npix/2 - np.nanmin(col) + buffer_size
             col += jump
             center[1] -= jump
 
-        if (np.min(row) < npix/2):
-            jump = npix/2 - np.min(row) + buffer_size
+        if (np.nanmin(row) < npix/2):
+            jump = npix/2 - np.nanmin(row) + buffer_size
             row += jump
             center[0] -= jump
 
-        if (np.max(row) > shape[0] - npix/2):
-            jump = shape[0]-npix/2 - np.max(row) - buffer_size
+        if (np.nanmax(row) > shape[0] - npix/2):
+            jump = shape[0]-npix/2 - np.nanmax(row) - buffer_size
             row += jump
             center[0] -= jump
 
-        if (np.max(col) > shape[1] - npix/2):
-            jump = shape[1]-npix/2 - np.max(col) - buffer_size
+        if (np.nanmax(col) > shape[1] - npix/2):
+            jump = shape[1]-npix/2 - np.nanmax(col) - buffer_size
             col += jump
             center[1] -= jump
 
@@ -113,27 +119,31 @@ class star(object):
             else:
                 season = (int(quarter) - 2) % 4
 
-            #season_arr[icount] = season
-            img = a[channel[season]].data
-            img -= np.median(img)
+            if np.isnan(channel[season]):
+                pimg = np.zeros((npix, npix))
 
-            ymintem = int(int(row[season])-npix/2)
-            xmintem = int(int(col[season])-npix/2)
+            else:
+                #season_arr[icount] = season
+                img = a[channel[season]].data
+                img -= np.median(img)
 
-            ymin = int(max([ymintem,0]))
-            ymax = int(min([int(row[season])+npix/2,img.shape[0]]))
-            xmin = int(max([xmintem,0]))
-            xmax = int(min([int(col[season])+npix/2,img.shape[1]]))
+                ymintem = int(int(row[season])-npix/2)
+                xmintem = int(int(col[season])-npix/2)
 
-            pimg = img[ymin:ymax,xmin:xmax]
+                ymin = int(max([ymintem,0]))
+                ymax = int(min([int(row[season])+npix/2,img.shape[0]]))
+                xmin = int(max([xmintem,0]))
+                xmax = int(min([int(col[season])+npix/2,img.shape[1]]))
 
-            if pimg.shape != (npix, npix):
-                sides = []
-                if ymintem < 0:
-                    sides.append("Top")
-                if xmintem < 0:
-                    sides.append("Left")
-                pimg = pad_img_wrap(pimg, (npix, npix), sides, 0)
+                pimg = img[ymin:ymax,xmin:xmax]
+
+                if pimg.shape != (npix, npix):
+                    sides = []
+                    if ymintem < 0:
+                        sides.append("Top")
+                    if xmintem < 0:
+                        sides.append("Left")
+                    pimg = pad_img_wrap(pimg, (npix, npix), sides, 0)
 
             fin_arr[icount,:,:] = pimg
 
@@ -282,7 +292,11 @@ class star(object):
                     if np.sum(border) != 0:
                         targets[targets == j] = i
 
-        targets = mh.labeled.remove_bordering(targets)
+        # don't remove bordering when star is also touch detect border
+        temp_removed = mh.labeled.remove_bordering(targets)
+        if np.any(temp_removed == 1):
+            targets = temp_removed
+
         for k in range(remove_excess):
             for i in range(ntargets):
                 if np.sum(self.integrated_postcard[targets == i]) < 0.01:
