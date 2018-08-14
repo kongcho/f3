@@ -127,21 +127,18 @@ class star(object):
                 img = a[channel[season]].data
                 img -= np.median(img)
 
-                ymintem = int(int(row[season])-npix/2)
-                xmintem = int(int(col[season])-npix/2)
-
-                ymin = int(max([ymintem,0]))
+                ymin = int(max([int(row[season])-npix/2,0]))
                 ymax = int(min([int(row[season])+npix/2,img.shape[0]]))
-                xmin = int(max([xmintem,0]))
+                xmin = int(max([int(col[season])-npix/2,0]))
                 xmax = int(min([int(col[season])+npix/2,img.shape[1]]))
 
                 pimg = img[ymin:ymax,xmin:xmax]
 
                 if pimg.shape != (npix, npix):
                     sides = []
-                    if ymintem < 0:
+                    if int(row[season]) < npix/2:
                         sides.append("Top")
-                    if xmintem < 0:
+                    if int(col[season]) < npix/2:
                         sides.append("Left")
                     pimg = pad_img_wrap(pimg, (npix, npix), sides, 0)
 
